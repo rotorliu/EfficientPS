@@ -26,6 +26,7 @@ def pytorch2onnx(model,
                  show=False,
                  output_file='tmp.onnx',
                  verify=False,
+                 do_simplify=False,
                  normalize_cfg=None):
     model.cuda().eval()
     # read image
@@ -65,7 +66,25 @@ def pytorch2onnx(model,
         verbose=show,
         opset_version=opset_version)
     model.forward = origin_forward
+
+    if do_simplify:
+        import onnxsim
+
+        input_dic = {'input': one_img.detach().cpu().numpy()}
+        onnx_model = onnx.load(output_file)
+        model_simp, check = onnxsim.simplify(onnx_model, input_data=input_dic)
+        assert check, "Simplified ONNX model could not be validated"
+
+        removed_initializers = []
+        for initializer in model_simp.graph.initializer:
+            if initializer.name in ['1218', '1081', '971', '861', '758', '756']:
+                removed_initializers.append(initializer)
+        for initializer in removed_initializers:
+            model_simp.graph.initializer.remove(initializer)
+        onnx.save(model_simp, output_file)
+        
     print(f'Successfully exported ONNX model: {output_file}')
+
     if verify:
         # check by onnx
         onnx_model = onnx.load(output_file)
@@ -110,6 +129,10 @@ def parse_args():
         '--verify',
         action='store_true',
         help='verify the onnx model output against pytorch output')
+    parser.add_argument(
+        '--simplify',
+        action='store_true',
+        help='Whether to simplify onnx model.')
     parser.add_argument(
         '--shape',
         type=int,
@@ -173,4 +196,5 @@ if __name__ == '__main__':
         show=args.show,
         output_file=args.output_file,
         verify=args.verify,
+        do_simplify=args.simplify,
         normalize_cfg=normalize_cfg)
