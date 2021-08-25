@@ -61,7 +61,6 @@ def pytorch2onnx(model,
         input_names=[input_name],
         output_names=output_names,
         export_params=True,
-        keep_initializers_as_inputs=True,
         do_constant_folding=True,
         verbose=show,
         opset_version=opset_version)
@@ -74,7 +73,9 @@ def pytorch2onnx(model,
 
         # check the numerical value
         # get pytorch output
-        pytorch_result = model([one_img], [[one_meta]], return_loss=False)
+        pytorch_result = model([one_img], [[one_meta]], return_loss=False, rescale=False, eval=True)
+        pytorch_pan_pred, pytorch_cat_pred = pytorch_result[0]
+        pytorch_pan_pred, pytorch_cat_pred = pytorch_pan_pred.numpy(), pytorch_cat_pred.numpy()
 
         # get onnx output
         input_all = [node.name for node in onnx_model.graph.input]
@@ -85,13 +86,13 @@ def pytorch2onnx(model,
         assert (len(net_feed_input) == 1)
         sess = rt.InferenceSession(output_file)
         from mmdet.core import bbox2result
-        det_bboxes, det_labels = sess.run(
-            None, {net_feed_input[0]: one_img.detach().numpy()})
+        pan_pred, cat_pred = sess.run(
+            None, {net_feed_input[0]: one_img.detach().cpu().numpy()})
         # only compare a part of result
-        bbox_results = bbox2result(det_bboxes, det_labels, 1)
-        onnx_results = bbox_results[0]
         assert np.allclose(
-            pytorch_result[0][:, 4], onnx_results[:, 4]
+            pytorch_pan_pred, pan_pred
+        ) and np.allclose(
+            pytorch_cat_pred, cat_pred
         ), 'The outputs are different between Pytorch and ONNX'
         print('The numerical values are same between Pytorch and ONNX')
 
