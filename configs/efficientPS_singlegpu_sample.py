@@ -3,15 +3,15 @@ model = dict(
     type='EfficientPS',
     pretrained=True,
     backbone=dict(
-        type='tf_efficientnet_b5',
+        type='tf_efficientnet_b0',
         act_cfg = dict(type="Identity"),  
-        norm_cfg=dict(type='InPlaceABN', activation='leaky_relu', activation_param=0.01, requires_grad=True),
+        norm_cfg=dict(type='BN', requires_grad=True),
         style='pytorch'),
     neck=dict(
         type='TWOWAYFPN',
-        in_channels=[40, 64, 176, 2048], #b0[24, 40, 112, 1280], #b4[32, 56, 160, 1792],
+        in_channels=[24, 40, 112, 1280], #b0[24, 40, 112, 1280], #b4[32, 56, 160, 1792],
         out_channels=256,
-        norm_cfg=dict(type='InPlaceABN', activation='leaky_relu', activation_param=0.01, requires_grad=True),
+        norm_cfg=dict(type='BN', requires_grad=True),
         act_cfg=None,
         num_outs=4),
     rpn_head=dict(
@@ -40,7 +40,7 @@ model = dict(
         num_classes=9,
         target_means=[0., 0., 0., 0.],
         target_stds=[0.1, 0.1, 0.2, 0.2],
-        norm_cfg=dict(type='InPlaceABN', activation='leaky_relu', activation_param=0.01, requires_grad=True),
+        norm_cfg=dict(type='BN', requires_grad=True),
         reg_class_agnostic=False,
         loss_cls=dict(
             type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
@@ -56,7 +56,7 @@ model = dict(
         in_channels=256,
         conv_out_channels=256,
         num_classes=9,
-        norm_cfg=dict(type='InPlaceABN', activation='leaky_relu', activation_param=0.01, requires_grad=True),
+        norm_cfg=dict(type='BN', requires_grad=True),
         act_cfg=None,
         loss_mask=dict(
             type='CrossEntropyLoss', use_mask=True, loss_weight=1.0)),
@@ -68,7 +68,7 @@ model = dict(
         ignore_label=255,
         loss_weight=1.0,
         ohem=0.25,
-        norm_cfg=dict(type='InPlaceABN', activation='leaky_relu', activation_param=0.01, requires_grad=True),
+        norm_cfg=dict(type='BN', requires_grad=True),
         act_cfg=None))
 
 
@@ -137,8 +137,8 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True, with_seg=True),
-    dict(type='Resize', img_scale=(2048, 1024), ratio_range=(0.5, 2.0), keep_ratio=True),
-    dict(type='RandomCrop', crop_size=(1024, 2048)),
+    dict(type='Resize', img_scale=(1280, 640), ratio_range=(0.5, 2.0), keep_ratio=True),
+    dict(type='RandomCrop', crop_size=(640, 1280)),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),

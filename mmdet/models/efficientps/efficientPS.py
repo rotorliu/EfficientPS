@@ -385,7 +385,7 @@ class EfficientPS(BaseDetector):
                 mask_feats = self.shared_head(mask_feats)
             mask_pred = self.mask_head(mask_feats)
             confidence = det_bboxes[:,4]
-            idx = torch.argsort(confidence, descending=True)
+            _, idx = torch.sort(confidence, descending=True)
             bbx_inv = invert_roi_bbx(det_bboxes[:, :4], 
                       tuple(mask_pred.shape[2:]), ref_size)
             bbx_idx = torch.arange(0, det_bboxes.size(0), 
