@@ -105,7 +105,6 @@ def pytorch2onnx(model,
         net_feed_input = list(set(input_all) - set(input_initializer))
         assert (len(net_feed_input) == 1)
         sess = rt.InferenceSession(output_file)
-        from mmdet.core import bbox2result
         pan_pred, cat_pred = sess.run(
             None, {net_feed_input[0]: one_img.detach().cpu().numpy()})
         # only compare a part of result
