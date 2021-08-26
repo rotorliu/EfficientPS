@@ -81,6 +81,7 @@ def pytorch2onnx(model,
                 removed_initializers.append(initializer)
         for initializer in removed_initializers:
             model_simp.graph.initializer.remove(initializer)
+            
         onnx.save(model_simp, output_file)
         
     print(f'Successfully exported ONNX model: {output_file}')
