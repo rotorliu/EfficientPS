@@ -1,7 +1,7 @@
 # model settings
 model = dict(
     type='EfficientPS',
-    pretrained='open-mmlab://regnetx_400mf',
+    pretrained='RegNetX-400MF_dds_8gpu.pyth',
     backbone=dict(
         type='RegNet',
         arch='regnetx_400mf',
