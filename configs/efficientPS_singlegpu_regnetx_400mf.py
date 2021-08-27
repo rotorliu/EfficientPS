@@ -11,10 +11,12 @@ model = dict(
         norm_eval=True,
         style='pytorch'),
     neck=dict(
-        type='FPN',
+        type='TWOWAYFPN',
         in_channels=[32, 64, 160, 384],
         out_channels=256,
-        num_outs=5),
+        norm_cfg=dict(type='BN', requires_grad=True),
+        act_cfg=None,
+        num_outs=4),
     rpn_head=dict(
         type='RPNHead',
         in_channels=256,
