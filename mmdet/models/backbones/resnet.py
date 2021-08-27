@@ -11,6 +11,7 @@ from mmdet.ops import (ContextBlock, GeneralizedAttention, build_conv_layer,
                        build_norm_layer)
 from mmdet.utils import get_root_logger
 from ..registry import BACKBONES
+from ..utils import ResLayer
 
 def get_activation(x, norm):
     if norm.activation == "leaky_relu":
@@ -556,6 +557,10 @@ class ResNet(nn.Module):
 
         self.feat_dim = self.block.expansion * 64 * 2**(
             len(self.stage_blocks) - 1)
+
+    def make_res_layer(self, **kwargs):
+        """Pack all blocks in a stage into a ``ResLayer``."""
+        return ResLayer(**kwargs)
 
     @property
     def norm1(self):
