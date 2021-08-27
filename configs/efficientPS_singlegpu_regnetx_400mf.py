@@ -4,7 +4,7 @@ model = dict(
     pretrained='open-mmlab://regnetx_400mf',
     backbone=dict(
         type='RegNet',
-        arch='regnetx_8.0gf',
+        arch='regnetx_400mf',
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),
